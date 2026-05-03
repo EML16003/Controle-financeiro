@@ -99,7 +99,6 @@ margin-top:10px;
 .hide{
 display:none;
 }
-
 </style>
 </head>
 
@@ -180,6 +179,7 @@ display:none;
 </div>
 
 <div id="summaryBox">
+
 <div class="summary">
 <div class="box income" id="incomeTotal"></div>
 <div class="box expense" id="expenseTotal"></div>
@@ -190,6 +190,12 @@ display:none;
 <p>Despesas Priscila: <span id="priscilaTotal"></span></p>
 
 <p class="alert" id="alert"></p>
+
+<!-- 🔥 NOVO: BOTÕES DE SINCRONIZAÇÃO -->
+<button onclick="exportData()">📤 Exportar dados</button>
+<button onclick="importData()">📥 Importar dados</button>
+<input type="file" id="fileInput" style="display:none">
+
 </div>
 </div>
 
@@ -271,21 +277,12 @@ if(person=="Priscila") priscila+=val
 let income=getIncome()
 let balance=income-total
 
-// ===== RESUMO FORMATADO =====
-document.getElementById("incomeTotal").innerText=
-"Renda Total: " + income.toFixed(2)
+document.getElementById("incomeTotal").innerText="Renda Total: "+income.toFixed(2)
+document.getElementById("expenseTotal").innerText="Despesa Total: "+total.toFixed(2)
+document.getElementById("balance").innerText="Saldo Restante: "+balance.toFixed(2)
 
-document.getElementById("expenseTotal").innerText=
-"Despesa Total: " + total.toFixed(2)
-
-document.getElementById("balance").innerText=
-"Saldo Restante: " + balance.toFixed(2)
-
-document.getElementById("edsonTotal").innerText=
-edson.toFixed(2)
-
-document.getElementById("priscilaTotal").innerText=
-priscila.toFixed(2)
+document.getElementById("edsonTotal").innerText=edson.toFixed(2)
+document.getElementById("priscilaTotal").innerText=priscila.toFixed(2)
 
 let msg=""
 if(total>income*0.7) msg="⚠ Atenção: despesas acima de 70% da renda"
@@ -343,6 +340,37 @@ if(data.salPriscila) document.getElementById("salPriscila").value=data.salPrisci
 if(data.expenses) data.expenses.forEach(e=>addExpense(e))
 if(data.income) data.income.forEach(i=>addIncome(i))
 }
+
+/* 🔥 EXPORTAÇÃO */
+function exportData(){
+let data=localStorage.getItem("financeSystem")
+if(!data)return alert("Sem dados")
+
+let blob=new Blob([data],{type:"application/json"})
+let url=URL.createObjectURL(blob)
+
+let a=document.createElement("a")
+a.href=url
+a.download="financeiro.json"
+a.click()
+}
+
+/* 🔥 IMPORTAÇÃO */
+function importData(){
+document.getElementById("fileInput").click()
+}
+
+document.getElementById("fileInput").addEventListener("change",function(e){
+let file=e.target.files[0]
+let reader=new FileReader()
+
+reader.onload=function(event){
+localStorage.setItem("financeSystem",event.target.result)
+location.reload()
+}
+
+reader.readAsText(file)
+})
 
 document.addEventListener("input",update)
 document.getElementById("monthFilter").addEventListener("change",update)
