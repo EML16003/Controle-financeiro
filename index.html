@@ -1,34 +1,18 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro Familiar</title>
-
+<title>Controle Financeiro Familiar - Avançado</title>
 <style>
 body{font-family:Arial;background:#f4f6f8;margin:20px}
 h1{margin-bottom:5px}
-
 .card{background:white;padding:15px;margin-bottom:20px;border-radius:8px}
-
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:8px;text-align:left}
 th{background:#e9ecef}
-
 input,select{width:100%;padding:5px;border:1px solid #ccc}
-
-button{padding:10px;margin-top:10px;cursor:pointer}
-
+button{padding:10px;margin-top:10px}
 .alert{font-weight:bold}
-
-/* SCROLL SÓ NA TABELA */
-.scroll-box{
-max-height:260px;
-overflow-y:auto;
-border:1px solid #ddd;
-}
-
-/* esconder */
-.hide{display:none}
 </style>
 </head>
 
@@ -38,13 +22,7 @@ border:1px solid #ddd;
 <p>Sistema offline – salva automaticamente no navegador.</p>
 
 <div class="card">
-
-<div style="display:flex;justify-content:space-between;align-items:center">
 <h2>Renda Mensal</h2>
-<button onclick="toggle('renda','btnRenda')" id="btnRenda">Ocultar</button>
-</div>
-
-<div id="renda">
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
 <tr><td>Edson</td><td><input id="salEdson" type="number" value="3922.48"></td></tr>
@@ -52,16 +30,8 @@ border:1px solid #ddd;
 </table>
 </div>
 
-</div>
-
 <div class="card">
-
-<div style="display:flex;justify-content:space-between;align-items:center">
 <h2>Registrar Despesa</h2>
-<button onclick="toggle('despesas','btnDesp')" id="btnDesp">Ocultar</button>
-</div>
-
-<div id="despesas" class="scroll-box">
 
 <table id="expenseTable">
 <tr>
@@ -73,21 +43,17 @@ border:1px solid #ddd;
 </tr>
 </table>
 
-</div>
-
 <button onclick="addRow()">Adicionar Despesa</button>
 
 </div>
 
 <div class="card">
-
 <h2>Filtro</h2>
+<label>Filtrar por mês:</label>
 <input type="month" id="monthFilter">
-
 </div>
 
 <div class="card">
-
 <h2>Resumo</h2>
 
 <p>Renda Total: <span id="incomeTotal"></span></p>
@@ -103,24 +69,10 @@ border:1px solid #ddd;
 
 <script>
 
-/* TOGGLE COM TEXTO DINÂMICO */
-function toggle(id,btnId){
-let el=document.getElementById(id)
-let btn=document.getElementById(btnId)
-
-el.classList.toggle("hide")
-
-if(el.classList.contains("hide")){
-btn.innerText="Exibir"
-}else{
-btn.innerText="Ocultar"
-}
-}
-
-/* DESPESA */
 function addRow(data={}){
 
 let table=document.getElementById("expenseTable")
+
 let row=table.insertRow()
 
 row.innerHTML=`
@@ -142,14 +94,14 @@ row.querySelector("select").value=data.person
 
 }
 
-/* RENDA */
 function getIncome(){
+
 let edson=Number(document.getElementById("salEdson").value)
 let priscila=Number(document.getElementById("salPriscila").value)
+
 return edson+priscila
 }
 
-/* UPDATE (SEM MUDANÇA) */
 function update(){
 
 let month=document.getElementById("monthFilter").value
@@ -169,6 +121,7 @@ let date=inputs[0].value
 let val=Number(inputs[3].value)
 
 if(!date)return
+
 if(month && !date.startsWith(month)) return
 
 total+=val
@@ -189,6 +142,7 @@ document.getElementById("edsonTotal").innerText=edsonTotal.toFixed(2)
 document.getElementById("priscilaTotal").innerText=priscilaTotal.toFixed(2)
 
 let alert=""
+
 if(total>income*0.7){
 alert="⚠ Atenção: despesas acima de 70% da renda"
 }
@@ -202,9 +156,9 @@ alert="ℹ Situação financeira estável."
 document.getElementById("alert").innerText=alert
 
 save()
+
 }
 
-/* SAVE ORIGINAL */
 function save(){
 
 let data={
@@ -234,7 +188,7 @@ localStorage.setItem("financeSystem",JSON.stringify(data))
 
 }
 
-/* LOAD ORIGINAL */
+/* ===== CORREÇÃO APLICADA AQUI ===== */
 function load(){
 
 let data=localStorage.getItem("financeSystem")
@@ -246,7 +200,18 @@ data=JSON.parse(data)
 document.getElementById("salEdson").value=data.salEdson
 document.getElementById("salPriscila").value=data.salPriscila
 
-data.expenses.forEach(e=>addRow(e))
+/* limpa antes de recarregar */
+document.querySelectorAll("#expenseTable tr:not(:first-child)").forEach(r=>r.remove())
+
+/* recria corretamente */
+if(Array.isArray(data.expenses)){
+for(let i=0;i<data.expenses.length;i++){
+addRow(data.expenses[i])
+}
+}
+
+/* força atualização após render */
+setTimeout(update,50)
 
 }
 
