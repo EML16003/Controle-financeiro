@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro Familiar - Pro</title>
+<title>Controle Financeiro Familiar - Estável</title>
 
 <style>
 body{
@@ -13,7 +13,6 @@ margin:20px;
 
 h1{text-align:center}
 
-/* CARD PADRÃO */
 .card{
 background:white;
 padding:15px;
@@ -21,20 +20,19 @@ margin-bottom:20px;
 border-radius:8px;
 }
 
-/* SCROLL BOX (NOVO) */
+/* SCROLL REAL FUNCIONANDO */
 .scroll-box{
-max-height:260px;
+max-height:250px;
 overflow-y:auto;
 border:1px solid #ddd;
 border-radius:6px;
-padding:5px;
 margin-top:10px;
 }
 
 /* TABELA */
 table{
-border-collapse:collapse;
 width:100%;
+border-collapse:collapse;
 font-size:14px;
 }
 
@@ -47,10 +45,9 @@ th{
 background:#e9ecef;
 position:sticky;
 top:0;
-z-index:2;
 }
 
-/* INPUTS */
+/* INPUT */
 input,select{
 width:100%;
 padding:5px;
@@ -60,7 +57,6 @@ padding:5px;
 button{
 padding:8px;
 margin-top:10px;
-cursor:pointer;
 }
 
 /* ALERT */
@@ -68,13 +64,8 @@ cursor:pointer;
 font-weight:bold;
 }
 
-/* OCULTAR */
 .hide{
 display:none;
-}
-
-.summary{
-margin-top:10px;
 }
 </style>
 </head>
@@ -89,18 +80,14 @@ margin-top:10px;
 
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
-<tr><td>Edson</td><td><input id="salEdson"></td></tr>
-<tr><td>Priscila</td><td><input id="salPriscila"></td></tr>
+<tr><td>Edson</td><td><input id="salEdson" type="number"></td></tr>
+<tr><td>Priscila</td><td><input id="salPriscila" type="number"></td></tr>
 </table>
 </div>
 
 <!-- ================= DESPESAS ================= -->
 <div class="card">
 <h2>Despesas</h2>
-
-<button onclick="toggle('despBox')">Ocultar/Exibir</button>
-
-<div id="despBox">
 
 <div class="scroll-box">
 <table id="expenseTable">
@@ -110,18 +97,12 @@ margin-top:10px;
 </table>
 </div>
 
-<button onclick="addRow()">+ Despesa</button>
-
-</div>
+<button onclick="addExpense()">+ Despesa</button>
 </div>
 
 <!-- ================= GANHOS ================= -->
 <div class="card">
 <h2>Ganhos Extras</h2>
-
-<button onclick="toggle('gainBox')">Ocultar/Exibir</button>
-
-<div id="gainBox">
 
 <div class="scroll-box">
 <table id="incomeTable">
@@ -132,16 +113,14 @@ margin-top:10px;
 </div>
 
 <button onclick="addIncome()">+ Ganho</button>
-
-</div>
 </div>
 
 <!-- ================= RESUMO ================= -->
 <div class="card">
 <h2>Resumo</h2>
 
-<p>Renda: <span id="incomeTotal"></span></p>
-<p>Despesas: <span id="expenseTotal"></span></p>
+<p>Renda Total: <span id="incomeTotal"></span></p>
+<p>Despesa Total: <span id="expenseTotal"></span></p>
 <p>Saldo: <span id="balance"></span></p>
 
 <p>Edson: <span id="edsonTotal"></span></p>
@@ -154,7 +133,7 @@ margin-top:10px;
 <div class="card">
 <h2>Sincronização</h2>
 
-<button onclick="exportData()">📤 Exportar</button>
+<button onclick="exportData()">📤 Exportar (WhatsApp)</button>
 
 <textarea id="importBox" style="width:100%;height:100px;margin-top:10px"
 placeholder="Cole aqui o JSON"></textarea>
@@ -165,13 +144,8 @@ placeholder="Cole aqui o JSON"></textarea>
 
 <script>
 
-/* ================= TOGGLE ================= */
-function toggle(id){
-document.getElementById(id).classList.toggle('hide')
-}
-
-/* ================= DESPESA ================= */
-function addRow(data={}){
+/* ================= DESPESAS ================= */
+function addExpense(data={}){
 
 let table=document.getElementById("expenseTable")
 
@@ -224,24 +198,22 @@ row.querySelector("select").value=data.person
 /* ================= CALCULO ================= */
 function update(){
 
-let total=0
-let edson=0
-let priscila=0
-let incomeExtra=0
+let total=0,edson=0,priscila=0,incomeExtra=0
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
-let v=r.querySelectorAll("input")[3].value
-let p=r.querySelector("select").value
-total+=Number(v)
-if(p=="Edson")edson+=Number(v)
-if(p=="Priscila")priscila+=Number(v)
+let inp=r.querySelectorAll("input")
+let person=r.querySelector("select").value
+let val=Number(inp[3].value)
+total+=val
+if(person=="Edson")edson+=val
+if(person=="Priscila")priscila+=val
 })
 
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
 if(i==0)return
-let v=r.querySelectorAll("input")[3].value
-incomeExtra+=Number(v)
+let val=r.querySelectorAll("input")[3].value
+incomeExtra+=Number(val)
 })
 
 let income=Number(salEdson.value)+Number(salPriscila.value)+incomeExtra
@@ -270,7 +242,7 @@ income:[]
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* ================= LOAD ================= */
+/* ================= LOAD (CORRIGIDO) ================= */
 function load(){
 
 let data=localStorage.getItem("financeSystem")
@@ -278,8 +250,16 @@ if(!data)return
 
 data=JSON.parse(data)
 
-salEdson.value=data.salEdson
-salPriscila.value=data.salPriscila
+salEdson.value=data.salEdson||0
+salPriscila.value=data.salPriscila||0
+
+if(data.expenses){
+data.expenses.forEach(e=>addExpense(e))
+}
+
+if(data.income){
+data.income.forEach(i=>addIncome(i))
+}
 
 }
 
@@ -300,8 +280,11 @@ location.reload()
 document.addEventListener("input",update)
 
 load()
-addRow()
-addIncome()
+
+if(document.querySelectorAll("#expenseTable tr").length==1){
+addExpense()
+}
+
 update()
 
 </script>
