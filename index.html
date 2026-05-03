@@ -201,7 +201,7 @@ function toggle(id){
 document.getElementById(id).classList.toggle("hide")
 }
 
-/* ===== DESPESA ===== */
+/* DESPESA */
 function addExpense(data={}){
 let table=document.getElementById("expenseTable")
 let row=table.insertRow()
@@ -223,7 +223,7 @@ row.innerHTML=`
 if(data.person) row.querySelector("select").value=data.person
 }
 
-/* ===== GANHOS ===== */
+/* GANHOS */
 function addIncome(data={}){
 let table=document.getElementById("incomeTable")
 let row=table.insertRow()
@@ -244,7 +244,7 @@ row.innerHTML=`
 if(data.person) row.querySelector("select").value=data.person
 }
 
-/* ===== RENDA ===== */
+/* RENDA */
 function getIncome(){
 let edson=Number(document.getElementById("salEdson").value)
 let priscila=Number(document.getElementById("salPriscila").value)
@@ -258,7 +258,7 @@ extra+=Number(r.querySelector("input[type=number]").value||0)
 return edson+priscila+extra
 }
 
-/* ===== UPDATE ===== */
+/* UPDATE */
 function update(){
 let month=document.getElementById("monthFilter").value
 
@@ -300,7 +300,7 @@ document.getElementById("alert").innerText=msg
 save()
 }
 
-/* ===== SAVE (COMPATÍVEL V1 + V2) ===== */
+/* SAVE */
 function save(){
 let data={
 salEdson:document.getElementById("salEdson").value,
@@ -335,7 +335,7 @@ val:inp[2].value
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* ===== LOAD (COMPATÍVEL ANTIGO + NOVO) ===== */
+/* LOAD COMPATÍVEL (CÓDIGO 1 + 2) */
 function load(){
 let data=localStorage.getItem("financeSystem")
 if(!data)return
@@ -345,12 +345,12 @@ data=JSON.parse(data)
 if(data.salEdson) document.getElementById("salEdson").value=data.salEdson
 if(data.salPriscila) document.getElementById("salPriscila").value=data.salPriscila
 
-/* compatibilidade código antigo */
+/* código 1 */
 if(data.expenses){
 data.expenses.forEach(e=>addExpense(e))
 }
 
-/* compatibilidade código novo */
+/* código 2 */
 if(data.income){
 data.income.forEach(i=>addIncome(i))
 }
