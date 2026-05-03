@@ -3,35 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle Financeiro Familiar - Refatorado</title>
+<title>Controle Financeiro Familiar</title>
 
 <style>
+
+/* ===== BASE ===== */
 body{
 font-family:Arial;
-background:#f4f6f8;
+background:#eef2f7;
 margin:20px;
 }
 
-h1{text-align:center}
-
-/* CARD */
-.card{
-background:#fff;
-padding:15px;
+h1{
+text-align:center;
 margin-bottom:20px;
-border-radius:8px;
 }
 
-/* SCROLL TABLE AREA */
-.scroll{
-max-height:240px;
-overflow-y:auto;
+/* ===== CARD ===== */
+.card{
+background:white;
+padding:15px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ===== SCROLL FIX (NOVO) ===== */
+.scroll-box{
+max-height:260px;      /* ALTURA FIXA */
+overflow-y:auto;       /* SCROLL VERTICAL */
 border:1px solid #ddd;
-border-radius:6px;
+border-radius:8px;
 margin-top:10px;
 }
 
-/* TABLE */
+/* ===== TABLE ===== */
 table{
 width:100%;
 border-collapse:collapse;
@@ -39,37 +45,58 @@ font-size:14px;
 }
 
 th,td{
-border:1px solid #ccc;
+border:1px solid #ddd;
 padding:6px;
 }
 
 th{
-background:#e9ecef;
+background:#f1f3f5;
 position:sticky;
 top:0;
+z-index:1;
 }
 
-/* INPUTS */
+/* ===== INPUT ===== */
 input,select{
 width:100%;
 padding:5px;
+border-radius:5px;
+border:1px solid #ccc;
 }
 
-/* BUTTONS */
+/* ===== RESUMO ===== */
+.summary{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.box{
+padding:10px;
+border-radius:8px;
+color:white;
+}
+
+.income{background:#198754;}
+.expense{background:#dc3545;}
+.balance{background:#0d6efd;}
+
+.alert{
+margin-top:10px;
+font-weight:bold;
+}
+
+/* ===== BOTÕES ===== */
 button{
 padding:8px;
 margin-top:10px;
+border:none;
+border-radius:6px;
+background:#2d6cdf;
+color:white;
 cursor:pointer;
 }
 
-/* ALERT */
-.alert{
-font-weight:bold;
-margin-top:10px;
-}
-
-/* HIDE */
-.hide{display:none;}
 </style>
 </head>
 
@@ -88,14 +115,18 @@ margin-top:10px;
 </table>
 </div>
 
-<!-- ================= DESPESAS ================= -->
+<!-- ================= DESPESAS (COM SCROLL) ================= -->
 <div class="card">
 <h2>Despesas</h2>
 
-<div class="scroll">
+<div class="scroll-box">
 <table id="expenseTable">
 <tr>
-<th>Data</th><th>Pessoa</th><th>Categoria</th><th>Descrição</th><th>Valor</th>
+<th>Data</th>
+<th>Pessoa</th>
+<th>Categoria</th>
+<th>Descrição</th>
+<th>Valor</th>
 </tr>
 </table>
 </div>
@@ -103,14 +134,17 @@ margin-top:10px;
 <button onclick="addExpense()">+ Despesa</button>
 </div>
 
-<!-- ================= GANHOS ================= -->
+<!-- ================= GANHOS (COM SCROLL) ================= -->
 <div class="card">
 <h2>Ganhos Extras</h2>
 
-<div class="scroll">
+<div class="scroll-box">
 <table id="incomeTable">
 <tr>
-<th>Data</th><th>Pessoa</th><th>Descrição</th><th>Valor</th>
+<th>Data</th>
+<th>Pessoa</th>
+<th>Descrição</th>
+<th>Valor</th>
 </tr>
 </table>
 </div>
@@ -122,41 +156,35 @@ margin-top:10px;
 <div class="card">
 <h2>Resumo Financeiro</h2>
 
-<p>Renda: <span id="incomeTotal"></span></p>
-<p>Despesas: <span id="expenseTotal"></span></p>
-<p>Saldo: <span id="balance"></span></p>
+<div class="summary">
+<div class="box income" id="incomeTotal"></div>
+<div class="box expense" id="expenseTotal"></div>
+<div class="box balance" id="balance"></div>
+</div>
 
 <p>Edson: <span id="edsonTotal"></span></p>
 <p>Priscila: <span id="priscilaTotal"></span></p>
 
 <p class="alert" id="alert"></p>
-</div>
-
-<!-- ================= SYNC ================= -->
-<div class="card">
-<h2>Sincronização</h2>
-
-<button onclick="exportData()">📤 Exportar</button>
-
-<textarea id="importBox" style="width:100%;height:100px;margin-top:10px"
-placeholder="Cole aqui o JSON"></textarea>
-
-<button onclick="importData()">📥 Importar</button>
 
 </div>
 
 <script>
 
-/* ================= ADD EXPENSE ================= */
+/* ===== DESPESA ===== */
 function addExpense(d={}){
 
 let t=document.getElementById("expenseTable")
-
 let r=t.insertRow()
 
 r.innerHTML=`
 <td><input value="${d.date||''}"></td>
-<td><select><option>Edson</option><option>Priscila</option></select></td>
+<td>
+<select>
+<option>Edson</option>
+<option>Priscila</option>
+</select>
+</td>
 <td><input value="${d.cat||''}"></td>
 <td><input value="${d.desc||''}"></td>
 <td><input value="${d.val||''}"></td>
@@ -165,16 +193,20 @@ r.innerHTML=`
 if(d.person) r.querySelector("select").value=d.person
 }
 
-/* ================= ADD INCOME ================= */
+/* ===== GANHO ===== */
 function addIncome(d={}){
 
 let t=document.getElementById("incomeTable")
-
 let r=t.insertRow()
 
 r.innerHTML=`
 <td><input value="${d.date||''}"></td>
-<td><select><option>Edson</option><option>Priscila</option></select></td>
+<td>
+<select>
+<option>Edson</option>
+<option>Priscila</option>
+</select>
+</td>
 <td><input value="${d.desc||''}"></td>
 <td><input value="${d.val||''}"></td>
 `
@@ -182,17 +214,15 @@ r.innerHTML=`
 if(d.person) r.querySelector("select").value=d.person
 }
 
-/* ================= UPDATE ================= */
+/* ===== UPDATE ===== */
 function update(){
 
-let exp=0,ed=0,pr=0,incomeExtra=0
+let exp=0,ed=0,pr=0,inc=0
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
-let i2=r.querySelectorAll("input")
+let v=Number(r.querySelectorAll("input")[3].value)
 let p=r.querySelector("select").value
-let v=Number(i2[3].value)
-
 exp+=v
 if(p=="Edson")ed+=v
 if(p=="Priscila")pr+=v
@@ -200,10 +230,10 @@ if(p=="Priscila")pr+=v
 
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
 if(i==0)return
-incomeExtra+=Number(r.querySelectorAll("input")[3].value)
+inc+=Number(r.querySelectorAll("input")[3].value)
 })
 
-let income=Number(salEdson.value)+Number(salPriscila.value)+incomeExtra
+let income=Number(salEdson.value)+Number(salPriscila.value)+inc
 let balance=income-exp
 
 incomeTotal.innerText=income.toFixed(2)
@@ -216,22 +246,19 @@ priscilaTotal.innerText=pr.toFixed(2)
 save()
 }
 
-/* ================= SAVE ================= */
+/* ===== SAVE ===== */
 function save(){
-
 let data={
 salEdson:salEdson.value,
 salPriscila:salPriscila.value,
 expenses:[],
 income:[]
 }
-
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* ================= LOAD ================= */
+/* ===== LOAD ===== */
 function load(){
-
 let d=localStorage.getItem("financeSystem")
 if(!d)return
 
@@ -244,19 +271,7 @@ if(d.expenses)d.expenses.forEach(e=>addExpense(e))
 if(d.income)d.income.forEach(i=>addIncome(i))
 }
 
-/* ================= EXPORT ================= */
-function exportData(){
-navigator.clipboard.writeText(localStorage.getItem("financeSystem"))
-alert("Copiado!")
-}
-
-/* ================= IMPORT ================= */
-function importData(){
-localStorage.setItem("financeSystem",importBox.value)
-location.reload()
-}
-
-/* ================= INIT ================= */
+/* ===== INIT ===== */
 document.addEventListener("input",update)
 
 load()
