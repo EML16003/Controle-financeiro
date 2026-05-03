@@ -7,7 +7,7 @@
 
 <style>
 body{
-font-family:Arial, sans-serif;
+font-family:Arial;
 background:#eef2f7;
 margin:10px;
 }
@@ -72,7 +72,7 @@ border-radius:5px;
 
 /* SCROLL */
 .scroll-box{
-max-height:250px;
+max-height:260px;
 overflow-y:auto;
 border:1px solid #ddd;
 border-radius:8px;
@@ -105,25 +105,27 @@ white-space:pre-line;
 
 <h1>Controle Financeiro Familiar</h1>
 
+<!-- RENDA -->
 <div class="card">
 <div class="header-bar">
 <h2>Renda Mensal</h2>
-<button class="small" onclick="toggle('incomeBox')">Ocultar/Exibir</button>
+<button class="small" onclick="toggle('incomeBox')">Ocultar</button>
 </div>
 
 <div id="incomeBox">
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
-<tr><td>Edson</td><td><input id="salEdson" type="number" value="3922.48"></td></tr>
-<tr><td>Priscila</td><td><input id="salPriscila" type="number" value="2141.64"></td></tr>
+<tr><td>Edson</td><td><input id="salEdson" type="number"></td></tr>
+<tr><td>Priscila</td><td><input id="salPriscila" type="number"></td></tr>
 </table>
 </div>
 </div>
 
+<!-- DESPESAS -->
 <div class="card">
 <div class="header-bar">
-<h2>Registrar Despesa</h2>
-<button class="small" onclick="toggle('expenseBox')">Ocultar/Exibir</button>
+<h2>Despesas</h2>
+<button class="small" onclick="toggle('expenseBox')">Ocultar</button>
 </div>
 
 <div id="expenseBox">
@@ -143,13 +145,14 @@ white-space:pre-line;
 </div>
 </div>
 
+<!-- GANHOS -->
 <div class="card">
 <div class="header-bar">
 <h2>Ganhos Extras</h2>
-<button class="small" onclick="toggle('incomeExtraBox')">Ocultar/Exibir</button>
+<button class="small" onclick="toggle('incomeBoxExtra')">Ocultar</button>
 </div>
 
-<div id="incomeExtraBox">
+<div id="incomeBoxExtra">
 <div class="scroll-box">
 <table id="incomeTable">
 <tr>
@@ -165,34 +168,26 @@ white-space:pre-line;
 </div>
 </div>
 
+<!-- FILTRO -->
 <div class="card">
-<div class="header-bar">
 <h2>Filtro</h2>
-<button class="small" onclick="toggle('filterBox')">Ocultar/Exibir</button>
-</div>
-<div id="filterBox">
 <input type="month" id="monthFilter">
 </div>
-</div>
 
+<!-- RESUMO -->
 <div class="card">
-<div class="header-bar">
 <h2>Resumo</h2>
-<button class="small" onclick="toggle('summaryBox')">Ocultar/Exibir</button>
-</div>
 
-<div id="summaryBox">
 <div class="summary">
 <div class="box income" id="incomeTotal"></div>
 <div class="box expense" id="expenseTotal"></div>
 <div class="box balance" id="balance"></div>
 </div>
 
-<p>Despesas Edson: <span id="edsonTotal"></span></p>
-<p>Despesas Priscila: <span id="priscilaTotal"></span></p>
+<p>Edson: <span id="edsonTotal"></span></p>
+<p>Priscila: <span id="priscilaTotal"></span></p>
 
 <p class="alert" id="alert"></p>
-</div>
 </div>
 
 <script>
@@ -202,100 +197,92 @@ document.getElementById(id).classList.toggle("hide")
 }
 
 /* DESPESA */
-function addExpense(data={}){
-let table=document.getElementById("expenseTable")
-let row=table.insertRow()
-
-row.innerHTML=`
-<td><input type="date" value="${data.date||""}"></td>
+function addExpense(d={}){
+let t=document.getElementById("expenseTable")
+let r=t.insertRow()
+r.innerHTML=`
+<td><input type="date" value="${d.date||""}"></td>
 <td>
 <select>
 <option>Edson</option>
 <option>Priscila</option>
 </select>
 </td>
-<td><input value="${data.cat||""}"></td>
-<td><input value="${data.desc||""}"></td>
-<td><input type="number" value="${data.val||""}"></td>
+<td><input value="${d.cat||""}"></td>
+<td><input value="${d.desc||""}"></td>
+<td><input type="number" value="${d.val||""}"></td>
 <td><button class="delete" onclick="this.parentElement.parentElement.remove();update();save()">X</button></td>
 `
-
-if(data.person) row.querySelector("select").value=data.person
+if(d.person) r.querySelector("select").value=d.person
 }
 
-/* GANHOS */
-function addIncome(data={}){
-let table=document.getElementById("incomeTable")
-let row=table.insertRow()
-
-row.innerHTML=`
-<td><input type="date" value="${data.date||""}"></td>
+/* GANHO */
+function addIncome(d={}){
+let t=document.getElementById("incomeTable")
+let r=t.insertRow()
+r.innerHTML=`
+<td><input type="date"></td>
 <td>
-<select>
-<option>Edson</option>
-<option>Priscila</option>
-</select>
+<select><option>Edson</option><option>Priscila</option></select>
 </td>
-<td><input value="${data.desc||""}"></td>
-<td><input type="number" value="${data.val||""}"></td>
+<td><input value="${d.desc||""}"></td>
+<td><input type="number" value="${d.val||""}"></td>
 <td><button class="delete" onclick="this.parentElement.parentElement.remove();update();save()">X</button></td>
 `
-
-if(data.person) row.querySelector("select").value=data.person
+if(d.person) r.querySelector("select").value=d.person
 }
 
 /* RENDA */
 function getIncome(){
-let edson=Number(document.getElementById("salEdson").value)
-let priscila=Number(document.getElementById("salPriscila").value)
-
+let e=Number(salEdson.value||0)
+let p=Number(salPriscila.value||0)
 let extra=0
+
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
 if(i==0)return
 extra+=Number(r.querySelector("input[type=number]").value||0)
 })
 
-return edson+priscila+extra
+return e+p+extra
 }
 
 /* UPDATE */
 function update(){
-let month=document.getElementById("monthFilter").value
+let month=monthFilter.value
+let total=0,ed=0,pr=0
 
-let total=0,edson=0,priscila=0
-
-document.querySelectorAll("#expenseTable tr").forEach((row,i)=>{
+document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
 
-let inputs=row.querySelectorAll("input")
-let person=row.querySelector("select").value
-let date=inputs[0].value
-let val=Number(inputs[3].value)
+let i2=r.querySelectorAll("input")
+let p=r.querySelector("select").value
+let d=i2[0].value
+let v=Number(i2[3].value)
 
-if(!date)return
-if(month && !date.startsWith(month)) return
+if(!d)return
+if(month && !d.startsWith(month))return
 
-total+=val
-if(person=="Edson") edson+=val
-if(person=="Priscila") priscila+=val
+total+=v
+if(p=="Edson")ed+=v
+if(p=="Priscila")pr+=v
 })
 
 let income=getIncome()
 let balance=income-total
 
-document.getElementById("incomeTotal").innerText="Renda Total: "+income.toFixed(2)
-document.getElementById("expenseTotal").innerText="Despesa Total: "+total.toFixed(2)
-document.getElementById("balance").innerText="Saldo Restante: "+balance.toFixed(2)
+incomeTotal.innerText="Renda: "+income.toFixed(2)
+expenseTotal.innerText="Gastos: "+total.toFixed(2)
+balance.innerText="Saldo: "+balance.toFixed(2)
 
-document.getElementById("edsonTotal").innerText=edson.toFixed(2)
-document.getElementById("priscilaTotal").innerText=priscila.toFixed(2)
+edsonTotal.innerText=ed.toFixed(2)
+priscilaTotal.innerText=pr.toFixed(2)
 
-let msg=""
-if(total>income*0.7) msg="⚠ Atenção: despesas acima de 70% da renda"
-else if(balance>2000) msg="✔ Excelente controle financeiro"
-else msg="ℹ Situação estável"
-
-document.getElementById("alert").innerText=msg
+alert.innerText=
+total>income*0.7
+?"⚠ Alto gasto"
+:balance>2000
+?"✔ Excelente"
+:"ℹ Normal"
 
 save()
 }
@@ -303,65 +290,59 @@ save()
 /* SAVE */
 function save(){
 let data={
-salEdson:document.getElementById("salEdson").value,
-salPriscila:document.getElementById("salPriscila").value,
+salEdson:salEdson.value,
+salPriscila:salPriscila.value,
 expenses:[],
 income:[]
 }
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
-let inp=r.querySelectorAll("input")
+let i2=r.querySelectorAll("input")
 data.expenses.push({
-date:inp[0].value,
+date:i2[0].value,
 person:r.querySelector("select").value,
-cat:inp[1].value,
-desc:inp[2].value,
-val:inp[3].value
+cat:i2[1].value,
+desc:i2[2].value,
+val:i2[3].value
 })
 })
 
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
 if(i==0)return
-let inp=r.querySelectorAll("input")
+let i2=r.querySelectorAll("input")
 data.income.push({
-date:inp[0].value,
+date:i2[0].value,
 person:r.querySelector("select").value,
-desc:inp[1].value,
-val:inp[2].value
+desc:i2[1].value,
+val:i2[2].value
 })
 })
 
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* LOAD COMPATÍVEL (CÓDIGO 1 + 2) */
+/* LOAD COMPATÍVEL */
 function load(){
-let data=localStorage.getItem("financeSystem")
-if(!data)return
+let d=JSON.parse(localStorage.getItem("financeSystem")||"null")
+if(!d)return
 
-data=JSON.parse(data)
+salEdson.value=d.salEdson||0
+salPriscila.value=d.salPriscila||0
 
-if(data.salEdson) document.getElementById("salEdson").value=data.salEdson
-if(data.salPriscila) document.getElementById("salPriscila").value=data.salPriscila
-
-/* código 1 */
-if(data.expenses){
-data.expenses.forEach(e=>addExpense(e))
+if(d.expenses)d.expenses.forEach(addExpense)
+if(d.income)d.income.forEach(addIncome)
 }
 
-/* código 2 */
-if(data.income){
-data.income.forEach(i=>addIncome(i))
-}
-}
-
+/* EVENTS */
 document.addEventListener("input",update)
-document.getElementById("monthFilter").addEventListener("change",update)
+monthFilter.addEventListener("change",update)
 
 load()
-addExpense()
-addIncome()
+
+if(!document.querySelector("#expenseTable tr:nth-child(2)"))addExpense()
+if(!document.querySelector("#incomeTable tr:nth-child(2)"))addIncome()
+
 update()
 
 </script>
