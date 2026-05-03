@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro Familiar - Estável</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Financeiro Familiar - Refatorado</title>
 
 <style>
 body{
@@ -13,23 +14,24 @@ margin:20px;
 
 h1{text-align:center}
 
+/* CARD */
 .card{
-background:white;
+background:#fff;
 padding:15px;
 margin-bottom:20px;
 border-radius:8px;
 }
 
-/* SCROLL REAL FUNCIONANDO */
-.scroll-box{
-max-height:250px;
+/* SCROLL TABLE AREA */
+.scroll{
+max-height:240px;
 overflow-y:auto;
 border:1px solid #ddd;
 border-radius:6px;
 margin-top:10px;
 }
 
-/* TABELA */
+/* TABLE */
 table{
 width:100%;
 border-collapse:collapse;
@@ -47,26 +49,27 @@ position:sticky;
 top:0;
 }
 
-/* INPUT */
+/* INPUTS */
 input,select{
 width:100%;
 padding:5px;
 }
 
-/* BOTÕES */
+/* BUTTONS */
 button{
 padding:8px;
 margin-top:10px;
+cursor:pointer;
 }
 
 /* ALERT */
 .alert{
 font-weight:bold;
+margin-top:10px;
 }
 
-.hide{
-display:none;
-}
+/* HIDE */
+.hide{display:none;}
 </style>
 </head>
 
@@ -89,7 +92,7 @@ display:none;
 <div class="card">
 <h2>Despesas</h2>
 
-<div class="scroll-box">
+<div class="scroll">
 <table id="expenseTable">
 <tr>
 <th>Data</th><th>Pessoa</th><th>Categoria</th><th>Descrição</th><th>Valor</th>
@@ -104,7 +107,7 @@ display:none;
 <div class="card">
 <h2>Ganhos Extras</h2>
 
-<div class="scroll-box">
+<div class="scroll">
 <table id="incomeTable">
 <tr>
 <th>Data</th><th>Pessoa</th><th>Descrição</th><th>Valor</th>
@@ -117,10 +120,10 @@ display:none;
 
 <!-- ================= RESUMO ================= -->
 <div class="card">
-<h2>Resumo</h2>
+<h2>Resumo Financeiro</h2>
 
-<p>Renda Total: <span id="incomeTotal"></span></p>
-<p>Despesa Total: <span id="expenseTotal"></span></p>
+<p>Renda: <span id="incomeTotal"></span></p>
+<p>Despesas: <span id="expenseTotal"></span></p>
 <p>Saldo: <span id="balance"></span></p>
 
 <p>Edson: <span id="edsonTotal"></span></p>
@@ -129,11 +132,11 @@ display:none;
 <p class="alert" id="alert"></p>
 </div>
 
-<!-- ================= SINCRONIZAÇÃO ================= -->
+<!-- ================= SYNC ================= -->
 <div class="card">
 <h2>Sincronização</h2>
 
-<button onclick="exportData()">📤 Exportar (WhatsApp)</button>
+<button onclick="exportData()">📤 Exportar</button>
 
 <textarea id="importBox" style="width:100%;height:100px;margin-top:10px"
 placeholder="Cole aqui o JSON"></textarea>
@@ -144,87 +147,71 @@ placeholder="Cole aqui o JSON"></textarea>
 
 <script>
 
-/* ================= DESPESAS ================= */
-function addExpense(data={}){
+/* ================= ADD EXPENSE ================= */
+function addExpense(d={}){
 
-let table=document.getElementById("expenseTable")
+let t=document.getElementById("expenseTable")
 
-let row=table.insertRow()
+let r=t.insertRow()
 
-row.innerHTML=`
-<td><input value="${data.date||''}"></td>
-<td>
-<select>
-<option>Edson</option>
-<option>Priscila</option>
-</select>
-</td>
-<td><input value="${data.cat||''}"></td>
-<td><input value="${data.desc||''}"></td>
-<td><input value="${data.val||''}"></td>
+r.innerHTML=`
+<td><input value="${d.date||''}"></td>
+<td><select><option>Edson</option><option>Priscila</option></select></td>
+<td><input value="${d.cat||''}"></td>
+<td><input value="${d.desc||''}"></td>
+<td><input value="${d.val||''}"></td>
 `
 
-if(data.person){
-row.querySelector("select").value=data.person
+if(d.person) r.querySelector("select").value=d.person
 }
 
-}
+/* ================= ADD INCOME ================= */
+function addIncome(d={}){
 
-/* ================= GANHOS ================= */
-function addIncome(data={}){
+let t=document.getElementById("incomeTable")
 
-let table=document.getElementById("incomeTable")
+let r=t.insertRow()
 
-let row=table.insertRow()
-
-row.innerHTML=`
-<td><input value="${data.date||''}"></td>
-<td>
-<select>
-<option>Edson</option>
-<option>Priscila</option>
-</select>
-</td>
-<td><input value="${data.desc||''}"></td>
-<td><input value="${data.val||''}"></td>
+r.innerHTML=`
+<td><input value="${d.date||''}"></td>
+<td><select><option>Edson</option><option>Priscila</option></select></td>
+<td><input value="${d.desc||''}"></td>
+<td><input value="${d.val||''}"></td>
 `
 
-if(data.person){
-row.querySelector("select").value=data.person
+if(d.person) r.querySelector("select").value=d.person
 }
 
-}
-
-/* ================= CALCULO ================= */
+/* ================= UPDATE ================= */
 function update(){
 
-let total=0,edson=0,priscila=0,incomeExtra=0
+let exp=0,ed=0,pr=0,incomeExtra=0
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
-let inp=r.querySelectorAll("input")
-let person=r.querySelector("select").value
-let val=Number(inp[3].value)
-total+=val
-if(person=="Edson")edson+=val
-if(person=="Priscila")priscila+=val
+let i2=r.querySelectorAll("input")
+let p=r.querySelector("select").value
+let v=Number(i2[3].value)
+
+exp+=v
+if(p=="Edson")ed+=v
+if(p=="Priscila")pr+=v
 })
 
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
 if(i==0)return
-let val=r.querySelectorAll("input")[3].value
-incomeExtra+=Number(val)
+incomeExtra+=Number(r.querySelectorAll("input")[3].value)
 })
 
 let income=Number(salEdson.value)+Number(salPriscila.value)+incomeExtra
-let balance=income-total
+let balance=income-exp
 
 incomeTotal.innerText=income.toFixed(2)
-expenseTotal.innerText=total.toFixed(2)
+expenseTotal.innerText=exp.toFixed(2)
 balance.innerText=balance.toFixed(2)
 
-edsonTotal.innerText=edson.toFixed(2)
-priscilaTotal.innerText=priscila.toFixed(2)
+edsonTotal.innerText=ed.toFixed(2)
+priscilaTotal.innerText=pr.toFixed(2)
 
 save()
 }
@@ -242,37 +229,30 @@ income:[]
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* ================= LOAD (CORRIGIDO) ================= */
+/* ================= LOAD ================= */
 function load(){
 
-let data=localStorage.getItem("financeSystem")
-if(!data)return
+let d=localStorage.getItem("financeSystem")
+if(!d)return
 
-data=JSON.parse(data)
+d=JSON.parse(d)
 
-salEdson.value=data.salEdson||0
-salPriscila.value=data.salPriscila||0
+salEdson.value=d.salEdson||0
+salPriscila.value=d.salPriscila||0
 
-if(data.expenses){
-data.expenses.forEach(e=>addExpense(e))
-}
-
-if(data.income){
-data.income.forEach(i=>addIncome(i))
-}
-
+if(d.expenses)d.expenses.forEach(e=>addExpense(e))
+if(d.income)d.income.forEach(i=>addIncome(i))
 }
 
 /* ================= EXPORT ================= */
 function exportData(){
 navigator.clipboard.writeText(localStorage.getItem("financeSystem"))
-alert("Copiado para WhatsApp")
+alert("Copiado!")
 }
 
 /* ================= IMPORT ================= */
 function importData(){
-let txt=document.getElementById("importBox").value
-localStorage.setItem("financeSystem",txt)
+localStorage.setItem("financeSystem",importBox.value)
 location.reload()
 }
 
@@ -280,11 +260,8 @@ location.reload()
 document.addEventListener("input",update)
 
 load()
-
-if(document.querySelectorAll("#expenseTable tr").length==1){
 addExpense()
-}
-
+addIncome()
 update()
 
 </script>
