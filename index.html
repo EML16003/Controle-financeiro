@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle Financeiro Familiar</title>
+<title>Controle Financeiro Familiar - Mobile</title>
 
 <style>
 body{
@@ -38,12 +38,6 @@ border:none;
 border-radius:6px;
 background:#2d6cdf;
 color:white;
-cursor:pointer;
-transition:0.2s;
-}
-
-button:hover{
-opacity:0.85;
 }
 
 button.small{
@@ -58,29 +52,6 @@ padding:4px 6px;
 font-size:12px;
 }
 
-/* 🔥 SCROLL MELHORADO */
-.scroll-area{
-max-height:260px;
-overflow-y:auto;
-border-radius:6px;
-scroll-behavior:smooth;
-}
-
-/* animação de esconder/exibir */
-.box-content{
-transition:all 0.3s ease;
-overflow:hidden;
-}
-
-.hide{
-max-height:0 !important;
-opacity:0;
-padding:0 !important;
-margin:0 !important;
-pointer-events:none;
-}
-
-/* tabela */
 table{
 width:100%;
 border-collapse:collapse;
@@ -124,6 +95,17 @@ white-space:pre-line;
 font-weight:bold;
 margin-top:10px;
 }
+
+.hide{
+display:none;
+}
+
+/* ===== SCROLL ADICIONADO ===== */
+.scroll-area{
+max-height:260px;
+overflow-y:auto;
+}
+
 </style>
 </head>
 
@@ -131,14 +113,13 @@ margin-top:10px;
 
 <h1>Controle Financeiro Familiar</h1>
 
-<!-- Renda -->
 <div class="card">
 <div class="header-bar">
 <h2>Renda Mensal</h2>
-<button class="small" onclick="toggle('incomeBox',this)">Ocultar</button>
+<button class="small" id="btnIncome" onclick="toggle('incomeBox','btnIncome')">Ocultar</button>
 </div>
 
-<div id="incomeBox" class="box-content scroll-area">
+<div id="incomeBox">
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
 <tr><td>Edson</td><td><input id="salEdson" type="number" value="3922.48"></td></tr>
@@ -147,14 +128,13 @@ margin-top:10px;
 </div>
 </div>
 
-<!-- Despesas -->
 <div class="card">
 <div class="header-bar">
 <h2>Registrar Despesa</h2>
-<button class="small" onclick="toggle('expenseBox',this)">Ocultar</button>
+<button class="small" id="btnExpense" onclick="toggle('expenseBox','btnExpense')">Ocultar</button>
 </div>
 
-<div id="expenseBox" class="box-content scroll-area">
+<div id="expenseBox" class="scroll-area">
 <table id="expenseTable">
 <tr>
 <th>Data</th>
@@ -169,14 +149,13 @@ margin-top:10px;
 </div>
 </div>
 
-<!-- Ganhos -->
 <div class="card">
 <div class="header-bar">
 <h2>Ganhos Extras</h2>
-<button class="small" onclick="toggle('incomeExtraBox',this)">Ocultar</button>
+<button class="small" id="btnIncomeExtra" onclick="toggle('incomeExtraBox','btnIncomeExtra')">Ocultar</button>
 </div>
 
-<div id="incomeExtraBox" class="box-content scroll-area">
+<div id="incomeExtraBox" class="scroll-area">
 <table id="incomeTable">
 <tr>
 <th>Data</th>
@@ -190,26 +169,23 @@ margin-top:10px;
 </div>
 </div>
 
-<!-- Filtro -->
 <div class="card">
 <div class="header-bar">
 <h2>Filtro</h2>
-<button class="small" onclick="toggle('filterBox',this)">Ocultar</button>
+<button class="small" id="btnFilter" onclick="toggle('filterBox','btnFilter')">Ocultar</button>
 </div>
-
-<div id="filterBox" class="box-content">
+<div id="filterBox">
 <input type="month" id="monthFilter">
 </div>
 </div>
 
-<!-- Resumo -->
 <div class="card">
 <div class="header-bar">
 <h2>Resumo Financeiro</h2>
-<button class="small" onclick="toggle('summaryBox',this)">Ocultar</button>
+<button class="small" id="btnSummary" onclick="toggle('summaryBox','btnSummary')">Ocultar</button>
 </div>
 
-<div id="summaryBox" class="box-content">
+<div id="summaryBox">
 <div class="summary">
 <div class="box income" id="incomeTotal"></div>
 <div class="box expense" id="expenseTotal"></div>
@@ -225,16 +201,16 @@ margin-top:10px;
 
 <script>
 
-/* 🔥 TOGGLE INTELIGENTE */
-function toggle(id, btn){
+function toggle(id, btnId){
 let el=document.getElementById(id)
+let btn=document.getElementById(btnId)
 
 el.classList.toggle('hide')
 
 if(el.classList.contains('hide')){
-btn.textContent="Exibir"
+btn.innerText="Exibir"
 }else{
-btn.textContent="Ocultar"
+btn.innerText="Ocultar"
 }
 }
 
