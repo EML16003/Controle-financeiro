@@ -2,102 +2,79 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle Financeiro Familiar - Mobile</title>
+<title>Controle Financeiro Familiar - Pro</title>
 
 <style>
 body{
-font-family:Arial, sans-serif;
-background:#eef2f7;
-margin:10px;
+font-family:Arial;
+background:#f4f6f8;
+margin:20px;
 }
 
-h1{
-text-align:center;
-margin-bottom:5px;
-}
+h1{text-align:center}
 
+/* CARD PADRÃO */
 .card{
 background:white;
-padding:12px;
-margin-bottom:15px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+padding:15px;
+margin-bottom:20px;
+border-radius:8px;
 }
 
-.header-bar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-button{
-padding:8px;
-margin-top:8px;
-border:none;
+/* SCROLL BOX (NOVO) */
+.scroll-box{
+max-height:260px;
+overflow-y:auto;
+border:1px solid #ddd;
 border-radius:6px;
-background:#2d6cdf;
-color:white;
+padding:5px;
+margin-top:10px;
 }
 
-button.small{
-padding:4px 6px;
-font-size:12px;
-background:#6c757d;
-}
-
-button.delete{
-background:#dc3545;
-padding:4px 6px;
-font-size:12px;
-}
-
+/* TABELA */
 table{
-width:100%;
 border-collapse:collapse;
+width:100%;
 font-size:14px;
 }
 
 th,td{
-border:1px solid #ddd;
+border:1px solid #ccc;
 padding:6px;
 }
 
 th{
-background:#f1f3f5;
+background:#e9ecef;
+position:sticky;
+top:0;
+z-index:2;
 }
 
+/* INPUTS */
 input,select{
 width:100%;
 padding:5px;
-border:1px solid #ccc;
-border-radius:5px;
+}
+
+/* BOTÕES */
+button{
+padding:8px;
+margin-top:10px;
+cursor:pointer;
+}
+
+/* ALERT */
+.alert{
+font-weight:bold;
+}
+
+/* OCULTAR */
+.hide{
+display:none;
 }
 
 .summary{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
-.box{
-padding:10px;
-border-radius:10px;
-color:white;
-white-space:pre-line;
-}
-
-.income{background:#198754;}
-.expense{background:#dc3545;}
-.balance{background:#0d6efd;}
-
-.alert{
-font-weight:bold;
 margin-top:10px;
-}
-
-.hide{
-display:none;
 }
 </style>
 </head>
@@ -106,163 +83,196 @@ display:none;
 
 <h1>Controle Financeiro Familiar</h1>
 
+<!-- ================= RENDA ================= -->
 <div class="card">
-<div class="header-bar">
 <h2>Renda Mensal</h2>
-<button class="small" onclick="toggle('incomeBox')">Ocultar/Exibir</button>
-</div>
 
-<div id="incomeBox">
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
-<tr><td>Edson</td><td><input id="salEdson" type="number" value="3922.48"></td></tr>
-<tr><td>Priscila</td><td><input id="salPriscila" type="number" value="2141.64"></td></tr>
+<tr><td>Edson</td><td><input id="salEdson"></td></tr>
+<tr><td>Priscila</td><td><input id="salPriscila"></td></tr>
 </table>
 </div>
-</div>
 
+<!-- ================= DESPESAS ================= -->
 <div class="card">
-<div class="header-bar">
-<h2>Registrar Despesa</h2>
-<button class="small" onclick="toggle('expenseBox')">Ocultar/Exibir</button>
-</div>
+<h2>Despesas</h2>
 
-<div id="expenseBox">
+<button onclick="toggle('despBox')">Ocultar/Exibir</button>
+
+<div id="despBox">
+
+<div class="scroll-box">
 <table id="expenseTable">
 <tr>
-<th>Data</th><th>Pessoa</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ação</th>
+<th>Data</th><th>Pessoa</th><th>Categoria</th><th>Descrição</th><th>Valor</th>
 </tr>
 </table>
-<button onclick="addExpense()">+ Despesa</button>
+</div>
+
+<button onclick="addRow()">+ Despesa</button>
+
 </div>
 </div>
 
+<!-- ================= GANHOS ================= -->
 <div class="card">
-<div class="header-bar">
 <h2>Ganhos Extras</h2>
-<button class="small" onclick="toggle('incomeExtraBox')">Ocultar/Exibir</button>
-</div>
 
-<div id="incomeExtraBox">
+<button onclick="toggle('gainBox')">Ocultar/Exibir</button>
+
+<div id="gainBox">
+
+<div class="scroll-box">
 <table id="incomeTable">
 <tr>
-<th>Data</th><th>Pessoa</th><th>Descrição</th><th>Valor</th><th>Ação</th>
+<th>Data</th><th>Pessoa</th><th>Descrição</th><th>Valor</th>
 </tr>
 </table>
+</div>
+
 <button onclick="addIncome()">+ Ganho</button>
+
 </div>
 </div>
 
+<!-- ================= RESUMO ================= -->
 <div class="card">
-<div class="header-bar">
-<h2>Filtro</h2>
-<button class="small" onclick="toggle('filterBox')">Ocultar/Exibir</button>
-</div>
-<div id="filterBox">
-<input type="month" id="monthFilter">
-</div>
-</div>
+<h2>Resumo</h2>
 
-<div class="card">
-<div class="header-bar">
-<h2>Resumo Financeiro</h2>
-<button class="small" onclick="toggle('summaryBox')">Ocultar/Exibir</button>
-</div>
+<p>Renda: <span id="incomeTotal"></span></p>
+<p>Despesas: <span id="expenseTotal"></span></p>
+<p>Saldo: <span id="balance"></span></p>
 
-<div id="summaryBox">
-
-<div class="summary">
-<div class="box income" id="incomeTotal"></div>
-<div class="box expense" id="expenseTotal"></div>
-<div class="box balance" id="balance"></div>
-</div>
-
-<p>Despesas Edson: <span id="edsonTotal"></span></p>
-<p>Despesas Priscila: <span id="priscilaTotal"></span></p>
+<p>Edson: <span id="edsonTotal"></span></p>
+<p>Priscila: <span id="priscilaTotal"></span></p>
 
 <p class="alert" id="alert"></p>
-
-<button onclick="exportText()">📤 Exportar (copiar texto)</button>
-
-<textarea id="importBox" placeholder="Cole aqui o JSON" style="width:100%;height:100px;margin-top:10px;"></textarea>
-
-<button onclick="importText()">📥 Importar do texto</button>
-
 </div>
+
+<!-- ================= SINCRONIZAÇÃO ================= -->
+<div class="card">
+<h2>Sincronização</h2>
+
+<button onclick="exportData()">📤 Exportar</button>
+
+<textarea id="importBox" style="width:100%;height:100px;margin-top:10px"
+placeholder="Cole aqui o JSON"></textarea>
+
+<button onclick="importData()">📥 Importar</button>
+
 </div>
 
 <script>
 
+/* ================= TOGGLE ================= */
 function toggle(id){
 document.getElementById(id).classList.toggle('hide')
 }
 
-/* ================= IMPORTANTE ================= */
+/* ================= DESPESA ================= */
+function addRow(data={}){
 
-function addExpense(data={}){
 let table=document.getElementById("expenseTable")
+
 let row=table.insertRow()
+
 row.innerHTML=`
-<td><input type='date' value='${data.date||""}'></td>
-<td><select><option>Edson</option><option>Priscila</option></select></td>
-<td><input value='${data.cat||""}'></td>
-<td><input value='${data.desc||""}'></td>
-<td><input type='number' value='${data.val||""}'></td>
-<td><button class='delete' onclick='this.parentElement.parentElement.remove();update();save();'>X</button></td>
+<td><input value="${data.date||''}"></td>
+<td>
+<select>
+<option>Edson</option>
+<option>Priscila</option>
+</select>
+</td>
+<td><input value="${data.cat||''}"></td>
+<td><input value="${data.desc||''}"></td>
+<td><input value="${data.val||''}"></td>
 `
-if(data.person) row.querySelector("select").value=data.person
+
+if(data.person){
+row.querySelector("select").value=data.person
 }
 
+}
+
+/* ================= GANHOS ================= */
 function addIncome(data={}){
+
 let table=document.getElementById("incomeTable")
+
 let row=table.insertRow()
+
 row.innerHTML=`
-<td><input type='date' value='${data.date||""}'></td>
-<td><select><option>Edson</option><option>Priscila</option></select></td>
-<td><input value='${data.desc||""}'></td>
-<td><input type='number' value='${data.val||""}'></td>
-<td><button class='delete' onclick='this.parentElement.parentElement.remove();update();save();'>X</button></td>
+<td><input value="${data.date||''}"></td>
+<td>
+<select>
+<option>Edson</option>
+<option>Priscila</option>
+</select>
+</td>
+<td><input value="${data.desc||''}"></td>
+<td><input value="${data.val||''}"></td>
 `
-if(data.person) row.querySelector("select").value=data.person
+
+if(data.person){
+row.querySelector("select").value=data.person
 }
 
+}
+
+/* ================= CALCULO ================= */
 function update(){
-let total=0,edson=0,priscila=0
+
+let total=0
+let edson=0
+let priscila=0
+let incomeExtra=0
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
 if(i==0)return
-let inputs=r.querySelectorAll("input")
-let person=r.querySelector("select").value
-let val=Number(inputs[3].value)
-total+=val
-if(person=="Edson") edson+=val
-if(person=="Priscila") priscila+=val
+let v=r.querySelectorAll("input")[3].value
+let p=r.querySelector("select").value
+total+=Number(v)
+if(p=="Edson")edson+=Number(v)
+if(p=="Priscila")priscila+=Number(v)
 })
 
-let income=Number(salEdson.value)+Number(salPriscila.value)
+document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
+if(i==0)return
+let v=r.querySelectorAll("input")[3].value
+incomeExtra+=Number(v)
+})
+
+let income=Number(salEdson.value)+Number(salPriscila.value)+incomeExtra
 let balance=income-total
 
-incomeTotal.innerText="Renda Total: "+income
-expenseTotal.innerText="Despesa Total: "+total
-balance.innerText="Saldo: "+balance
+incomeTotal.innerText=income.toFixed(2)
+expenseTotal.innerText=total.toFixed(2)
+balance.innerText=balance.toFixed(2)
 
-edsonTotal.innerText=edson
-priscilaTotal.innerText=priscila
+edsonTotal.innerText=edson.toFixed(2)
+priscilaTotal.innerText=priscila.toFixed(2)
 
 save()
 }
 
+/* ================= SAVE ================= */
 function save(){
+
 let data={
 salEdson:salEdson.value,
 salPriscila:salPriscila.value,
-expenses:[]
+expenses:[],
+income:[]
 }
 
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
+/* ================= LOAD ================= */
 function load(){
+
 let data=localStorage.getItem("financeSystem")
 if(!data)return
 
@@ -270,38 +280,28 @@ data=JSON.parse(data)
 
 salEdson.value=data.salEdson
 salPriscila.value=data.salPriscila
+
 }
 
 /* ================= EXPORT ================= */
-
-function exportText(){
-let data=localStorage.getItem("financeSystem")
-navigator.clipboard.writeText(data)
-alert("Copiado para colar no WhatsApp")
+function exportData(){
+navigator.clipboard.writeText(localStorage.getItem("financeSystem"))
+alert("Copiado para WhatsApp")
 }
 
-/* ================= IMPORTAÇÃO CORRIGIDA ================= */
-
-function importText(){
+/* ================= IMPORT ================= */
+function importData(){
 let txt=document.getElementById("importBox").value
-
-try{
-let data=JSON.parse(txt)
-
-localStorage.setItem("financeSystem",JSON.stringify(data))
-
+localStorage.setItem("financeSystem",txt)
 location.reload()
-
-}catch(e){
-alert("Erro: JSON inválido")
-}
 }
 
 /* ================= INIT ================= */
-
 document.addEventListener("input",update)
 
 load()
+addRow()
+addIncome()
 update()
 
 </script>
