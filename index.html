@@ -182,12 +182,10 @@ display:none;
 
 <p class="alert" id="alert"></p>
 
-<!-- 🔥 EXPORTAÇÃO -->
-<button onclick="exportText()">📤 Exportar (WhatsApp)</button>
-<button onclick="exportFile()">📥 Baixar backup</button>
+<button onclick="exportText()">📤 Exportar (copiar texto)</button>
 
-<!-- 🔥 IMPORTAÇÃO POR TEXTO -->
 <textarea id="importBox" placeholder="Cole aqui o JSON" style="width:100%;height:100px;margin-top:10px;"></textarea>
+
 <button onclick="importText()">📥 Importar do texto</button>
 
 </div>
@@ -199,7 +197,7 @@ function toggle(id){
 document.getElementById(id).classList.toggle('hide')
 }
 
-/* ================= CRUD ================= */
+/* ================= IMPORTANTE ================= */
 
 function addExpense(data={}){
 let table=document.getElementById("expenseTable")
@@ -228,23 +226,7 @@ row.innerHTML=`
 if(data.person) row.querySelector("select").value=data.person
 }
 
-/* ================= CALCULO ================= */
-
-function getIncome(){
-let edson=Number(document.getElementById("salEdson").value)
-let priscila=Number(document.getElementById("salPriscila").value)
-
-let extra=0
-document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
-if(i==0)return
-extra+=Number(r.querySelector("input[type=number]").value)
-})
-
-return edson+priscila+extra
-}
-
 function update(){
-
 let total=0,edson=0,priscila=0
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
@@ -257,63 +239,62 @@ if(person=="Edson") edson+=val
 if(person=="Priscila") priscila+=val
 })
 
-let income=getIncome()
+let income=Number(salEdson.value)+Number(salPriscila.value)
 let balance=income-total
 
-document.getElementById("incomeTotal").innerText="Renda Total: "+income.toFixed(2)
-document.getElementById("expenseTotal").innerText="Despesa Total: "+total.toFixed(2)
-document.getElementById("balance").innerText="Saldo: "+balance.toFixed(2)
+incomeTotal.innerText="Renda Total: "+income
+expenseTotal.innerText="Despesa Total: "+total
+balance.innerText="Saldo: "+balance
 
-document.getElementById("edsonTotal").innerText=edson.toFixed(2)
-document.getElementById("priscilaTotal").innerText=priscila.toFixed(2)
+edsonTotal.innerText=edson
+priscilaTotal.innerText=priscila
 
 save()
 }
-
-/* ================= SAVE ================= */
 
 function save(){
 let data={
 salEdson:salEdson.value,
 salPriscila:salPriscila.value,
-expenses:[],
-income:[]
+expenses:[]
 }
 
 localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
-/* ================= LOAD ================= */
-
 function load(){
 let data=localStorage.getItem("financeSystem")
 if(!data)return
+
 data=JSON.parse(data)
-if(data.salEdson)salEdson.value=data.salEdson
-if(data.salPriscila)salPriscila.value=data.salPriscila
+
+salEdson.value=data.salEdson
+salPriscila.value=data.salPriscila
 }
 
-/* ================= EXPORT / IMPORT ================= */
+/* ================= EXPORT ================= */
 
 function exportText(){
 let data=localStorage.getItem("financeSystem")
 navigator.clipboard.writeText(data)
-alert("Copiado! Envie no WhatsApp")
+alert("Copiado para colar no WhatsApp")
 }
 
-function exportFile(){
-let data=localStorage.getItem("financeSystem")
-let blob=new Blob([data],{type:"application/json"})
-let a=document.createElement("a")
-a.href=URL.createObjectURL(blob)
-a.download="backup.json"
-a.click()
-}
+/* ================= IMPORTAÇÃO CORRIGIDA ================= */
 
 function importText(){
 let txt=document.getElementById("importBox").value
-localStorage.setItem("financeSystem",txt)
+
+try{
+let data=JSON.parse(txt)
+
+localStorage.setItem("financeSystem",JSON.stringify(data))
+
 location.reload()
+
+}catch(e){
+alert("Erro: JSON inválido")
+}
 }
 
 /* ================= INIT ================= */
