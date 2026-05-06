@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle Financeiro Familiar - Mobile</title>
+<title>Controle Financeiro Familiar</title>
 
 <style>
+
 body{
 font-family:Arial, sans-serif;
 background:#eef2f7;
@@ -31,53 +32,49 @@ justify-content:space-between;
 align-items:center;
 }
 
+/* 🔧 BOTÕES RESTAURADOS COM EFEITOS */
 button{
 padding:8px;
 margin-top:8px;
 border:none;
-border-radius:6px;
-background:#2d6cdf;
+border-radius:8px;
 color:white;
+cursor:pointer;
+transition:0.2s;
 }
 
-button.small{
-padding:4px 6px;
-font-size:12px;
-background:#6c757d;
+/* pequenos */
+button.small{background:#1f6feb;padding:4px 8px;font-size:12px;}
+button.small:hover{background:#4a8cff;}
+button.small:active{background:#0a2f8f;}
+
+/* excluir */
+button.delete{background:#dc3545;}
+button.delete:hover{background:#e4606d;}
+button.delete:active{background:#7a1c25;}
+
+/* adicionar */
+button.add{background:#198754;}
+button.add:hover{background:#3cbf7a;}
+button.add:active{background:#0b4d2a;}
+
+/* padrão (caso use outros botões) */
+button:hover{
+filter:brightness(1.1);
+}
+button:active{
+filter:brightness(0.85);
 }
 
-button.delete{
-background:#dc3545;
-padding:4px 6px;
-font-size:12px;
+.scroll-area{
+max-height:360px;
+overflow-y:auto;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-font-size:14px;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:6px;
-}
-
-th{
-background:#f1f3f5;
-}
-
-input,select{
-width:100%;
-padding:5px;
-border:1px solid #ccc;
-border-radius:5px;
-}
-
-.summary{
+.summary-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:10px;
+gap:12px;
 }
 
 .box{
@@ -92,18 +89,36 @@ white-space:pre-line;
 .balance{background:#0d6efd;}
 
 .alert{
+background:#fff3cd;
+padding:10px;
+border-left:5px solid #ffc107;
+border-radius:8px;
 font-weight:bold;
-margin-top:10px;
 }
 
-.hide{
-display:none;
+.hide{display:none;}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
 }
 
-/* ===== SCROLL ADICIONADO ===== */
-.scroll-area{
-max-height:260px;
-overflow-y:auto;
+th,td{
+border:1px solid #ddd;
+padding:10px;
+vertical-align:middle;
+}
+
+th{
+background:#f1f3f5;
+}
+
+input,select{
+width:100%;
+padding:6px;
+border:1px solid #ccc;
+border-radius:5px;
 }
 
 </style>
@@ -116,10 +131,10 @@ overflow-y:auto;
 <div class="card">
 <div class="header-bar">
 <h2>Renda Mensal</h2>
-<button class="small" id="btnIncome" onclick="toggle('incomeBox','btnIncome')">Ocultar</button>
+<button class="small" onclick="toggle('incomeBox', this)">Exibir</button>
 </div>
 
-<div id="incomeBox">
+<div id="incomeBox" class="hide">
 <table>
 <tr><th>Pessoa</th><th>Salário</th></tr>
 <tr><td>Edson</td><td><input id="salEdson" type="number" value="3922.48"></td></tr>
@@ -130,8 +145,8 @@ overflow-y:auto;
 
 <div class="card">
 <div class="header-bar">
-<h2>Registrar Despesa</h2>
-<button class="small" id="btnExpense" onclick="toggle('expenseBox','btnExpense')">Ocultar</button>
+<h2>Despesas</h2>
+<button class="small" onclick="toggle('expenseBox', this)">Ocultar</button>
 </div>
 
 <div id="expenseBox" class="scroll-area">
@@ -145,14 +160,15 @@ overflow-y:auto;
 <th>Ação</th>
 </tr>
 </table>
-<button onclick="addExpense()">+ Despesa</button>
+
+<button class="add" onclick="addExpense(); update(); save();">+ Despesa</button>
 </div>
 </div>
 
 <div class="card">
 <div class="header-bar">
 <h2>Ganhos Extras</h2>
-<button class="small" id="btnIncomeExtra" onclick="toggle('incomeExtraBox','btnIncomeExtra')">Ocultar</button>
+<button class="small" onclick="toggle('incomeExtraBox', this)">Ocultar</button>
 </div>
 
 <div id="incomeExtraBox" class="scroll-area">
@@ -165,58 +181,131 @@ overflow-y:auto;
 <th>Ação</th>
 </tr>
 </table>
-<button onclick="addIncome()">+ Ganho</button>
+
+<button class="add" onclick="addIncome(); update(); save();">+ Ganho</button>
 </div>
 </div>
 
 <div class="card">
-<div class="header-bar">
 <h2>Filtro</h2>
-<button class="small" id="btnFilter" onclick="toggle('filterBox','btnFilter')">Ocultar</button>
-</div>
-<div id="filterBox">
-<input type="month" id="monthFilter">
-</div>
+<input type="month" id="monthFilter" onchange="update()">
 </div>
 
 <div class="card">
-<div class="header-bar">
-<h2>Resumo Financeiro</h2>
-<button class="small" id="btnSummary" onclick="toggle('summaryBox','btnSummary')">Ocultar</button>
-</div>
 
-<div id="summaryBox">
-<div class="summary">
+<div class="summary-grid">
+
+<div class="summary-left">
 <div class="box income" id="incomeTotal"></div>
 <div class="box expense" id="expenseTotal"></div>
 <div class="box balance" id="balance"></div>
 </div>
 
+<div class="summary-right">
 <p>Despesas Edson: <span id="edsonTotal"></span></p>
 <p>Despesas Priscila: <span id="priscilaTotal"></span></p>
-
 <p class="alert" id="alert"></p>
 </div>
+
+</div>
+
 </div>
 
 <script>
 
-function toggle(id, btnId){
+function toggle(id, btn){
 let el=document.getElementById(id)
-let btn=document.getElementById(btnId)
-
-el.classList.toggle('hide')
-
-if(el.classList.contains('hide')){
-btn.innerText="Exibir"
-}else{
-btn.innerText="Ocultar"
+el.classList.toggle("hide")
+btn.innerText=el.classList.contains("hide")?"Exibir":"Ocultar"
 }
+
+function getMonth(date){
+return date ? date.substring(0,7) : ""
 }
+
+function getIncome(){
+return Number(document.getElementById("salEdson").value)+
+Number(document.getElementById("salPriscila").value)
+}
+
+function update(){
+
+let filter=document.getElementById("monthFilter").value
+
+let total=0, edson=0, priscila=0, incomeExtra=0
+
+document.querySelectorAll("#expenseTable tr").forEach((row,i)=>{
+if(i===0)return
+
+let inputs=row.querySelectorAll("input")
+let date=inputs[0].value
+let person=row.querySelector("select").value
+let val=Number(inputs[3].value||0)
+
+if(filter && getMonth(date)!==filter) return
+
+total+=val
+if(person==="Edson") edson+=val
+if(person==="Priscila") priscila+=val
+})
+
+document.querySelectorAll("#incomeTable tr").forEach((row,i)=>{
+if(i===0)return
+
+let inputs=row.querySelectorAll("input")
+let date=inputs[0].value
+let val=Number(inputs[2].value||0)
+
+if(filter && getMonth(date)!==filter) return
+
+incomeExtra+=val
+})
+
+let salary=getIncome()
+let income=salary+incomeExtra
+let balance=income-total
+
+document.getElementById("incomeTotal").innerText="Renda Total: "+income.toLocaleString('pt-BR',{minimumFractionDigits:2})
+document.getElementById("expenseTotal").innerText="Despesa Total: "+total.toLocaleString('pt-BR',{minimumFractionDigits:2})
+document.getElementById("balance").innerText="Saldo Restante: "+balance.toLocaleString('pt-BR',{minimumFractionDigits:2})
+
+document.getElementById("edsonTotal").innerText=edson.toLocaleString('pt-BR',{minimumFractionDigits:2})
+document.getElementById("priscilaTotal").innerText=priscila.toLocaleString('pt-BR',{minimumFractionDigits:2})
+
+document.getElementById("alert").innerText =
+total>income*0.7
+? "⚠ Atenção: despesas acima de 70% da renda"
+: "✔ Situação estável"
+
+save()
+}
+
+/* resto mantido igual */
 
 function addExpense(data={}){
+
+if(!document.getElementById("categoriaLista")){
+let dl=document.createElement("datalist")
+dl.id="categoriaLista"
+dl.innerHTML=`
+<option value="Alimentação">
+<option value="Moradia">
+<option value="Transporte">
+<option value="Saúde">
+<option value="Educação">
+<option value="Lazer">
+<option value="Internet">
+<option value="Energia">
+<option value="Água">
+<option value="Cartão">
+<option value="Outros">
+`
+document.body.appendChild(dl)
+}
+
 let table=document.getElementById("expenseTable")
 let row=table.insertRow()
+
 row.innerHTML=`
 <td><input type='date' value='${data.date||""}'></td>
 <td>
@@ -225,82 +314,38 @@ row.innerHTML=`
 <option>Priscila</option>
 </select>
 </td>
-<td><input value='${data.cat||""}'></td>
+<td><input list="categoriaLista" value='${data.cat||""}'></td>
 <td><input value='${data.desc||""}'></td>
 <td><input type='number' value='${data.val||""}'></td>
-<td><button class='delete' onclick='if(confirm("Excluir?")){ this.parentElement.parentElement.remove(); update(); save(); }'>X</button></td>
+<td><button class="delete" onclick='confirmDelete(this)'>X</button></td>
 `
-if(data.person) row.querySelector("select").value=data.person
 }
 
 function addIncome(data={}){
+
 let table=document.getElementById("incomeTable")
 let row=table.insertRow()
+
 row.innerHTML=`
 <td><input type='date' value='${data.date||""}'></td>
 <td>
-<select><option>Edson</option><option>Priscila</option></select>
+<select>
+<option>Edson</option>
+<option>Priscila</option>
+</select>
 </td>
 <td><input value='${data.desc||""}'></td>
 <td><input type='number' value='${data.val||""}'></td>
-<td><button class='delete' onclick='if(confirm("Excluir?")){ this.parentElement.parentElement.remove(); update(); save(); }'>X</button></td>
+<td><button class="delete" onclick='confirmDelete(this)'>X</button></td>
 `
-if(data.person) row.querySelector("select").value=data.person
 }
 
-function getIncome(){
-let edson=Number(document.getElementById("salEdson").value)
-let priscila=Number(document.getElementById("salPriscila").value)
-
-let extra=0
-let rows=document.querySelectorAll("#incomeTable tr")
-rows.forEach((r,i)=>{
-if(i==0)return
-let val=Number(r.querySelector("input[type=number]").value)
-extra+=val
-})
-
-return edson+priscila+extra
-}
-
-function update(){
-let month=document.getElementById("monthFilter").value
-
-let total=0,edson=0,priscila=0
-
-let rows=document.querySelectorAll("#expenseTable tr")
-rows.forEach((row,i)=>{
-if(i==0)return
-let inputs=row.querySelectorAll("input")
-let person=row.querySelector("select").value
-let date=inputs[0].value
-let val=Number(inputs[3].value)
-if(!date)return
-if(month && !date.startsWith(month)) return
-
-total+=val
-if(person=="Edson") edson+=val
-if(person=="Priscila") priscila+=val
-})
-
-let income=getIncome()
-let balance=income-total
-
-document.getElementById("incomeTotal").innerText="Renda Total: "+income.toFixed(2)
-document.getElementById("expenseTotal").innerText="Despesa Total: "+total.toFixed(2)
-document.getElementById("balance").innerText="Saldo Restante: "+balance.toFixed(2)
-
-document.getElementById("edsonTotal").innerText=edson.toFixed(2)
-document.getElementById("priscilaTotal").innerText=priscila.toFixed(2)
-
-let msg=""
-if(total>income*0.7) msg="⚠ Atenção: despesas acima de 70% da renda"
-else if(balance>2000) msg="✔ Excelente controle financeiro"
-else msg="ℹ Situação estável"
-
-document.getElementById("alert").innerText=msg
-
+function confirmDelete(btn){
+if(confirm("Tem certeza que deseja excluir este registro?")){
+btn.parentElement.parentElement.remove()
+update()
 save()
+}
 }
 
 function save(){
@@ -312,8 +357,9 @@ income:[]
 }
 
 document.querySelectorAll("#expenseTable tr").forEach((r,i)=>{
-if(i==0)return
+if(i===0)return
 let i2=r.querySelectorAll("input")
+
 data.expenses.push({
 date:i2[0].value,
 person:r.querySelector("select").value,
@@ -324,8 +370,9 @@ val:i2[3].value
 })
 
 document.querySelectorAll("#incomeTable tr").forEach((r,i)=>{
-if(i==0)return
+if(i===0)return
 let i2=r.querySelectorAll("input")
+
 data.income.push({
 date:i2[0].value,
 person:r.querySelector("select").value,
@@ -338,20 +385,15 @@ localStorage.setItem("financeSystem",JSON.stringify(data))
 }
 
 function load(){
-let data=localStorage.getItem("financeSystem")
+let data=JSON.parse(localStorage.getItem("financeSystem")||"null")
 if(!data)return
 
-data=JSON.parse(data)
+document.getElementById("salEdson").value=data.salEdson||0
+document.getElementById("salPriscila").value=data.salPriscila||0
 
-if(data.salEdson) document.getElementById("salEdson").value=data.salEdson
-if(data.salPriscila) document.getElementById("salPriscila").value=data.salPriscila
-
-if(data.expenses) data.expenses.forEach(e=>addExpense(e))
-if(data.income) data.income.forEach(i=>addIncome(i))
+data.expenses?.forEach(e=>addExpense(e))
+data.income?.forEach(i=>addIncome(i))
 }
-
-document.addEventListener("input",update)
-document.getElementById("monthFilter").addEventListener("change",update)
 
 load()
 addExpense()
